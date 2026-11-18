@@ -47,7 +47,7 @@ mod tests {
     use ergotree_ir::sigma_protocol::dlog_group::scalar_to_bigint256;
     use ergotree_ir::unsignedbigint256::UnsignedBigInt;
     use k256::Scalar;
-    use num_traits::Num;
+    use num_traits::{Bounded, Num};
     use proptest::prelude::*;
     use sigma_test_util::force_any_val;
 
@@ -158,17 +158,11 @@ mod tests {
     }
 
     #[test]
-    fn eval_exponent_large_negative() {
-        // -(2^255 - 1), the smallest BigInt256 value.
-        let exponent = BigInt256::from_str_radix(
-            "-57896044618658097711785492504343953926634992332820282019728792003956564819967",
-            10,
-        )
-        .unwrap();
+    fn eval_exponent_min_value() {
         let base = ergo_chain_types::ec_point::generator();
-        let magnitude = UnsignedBigInt::try_from(-exponent).unwrap();
+        let magnitude = UnsignedBigInt::from(1u32) << 255u32;
         assert_eq!(
-            eval_exponentiate(base, exponent),
+            eval_exponentiate(base, BigInt256::min_value()),
             -exp_unsigned(&base, magnitude)
         );
     }
